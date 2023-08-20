@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package page;
+
+message Page {
+    int32 book_id = 1;
+    optional string content = 2;
+    uint32 page_number = 3;
+    int32 id = 4;
+}

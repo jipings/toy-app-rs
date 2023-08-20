@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package book;
+
+message BookRequest {
+    optional int32 id = 1;
+    string isbn = 2;
+    string title = 3;
+}
