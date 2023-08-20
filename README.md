@@ -3,11 +3,14 @@
 
 ### Library crates
 > $ cargo new --vcs=none --lib common
+
 > $ cargo new --vcs=none --lib database
+
 > $ cargo new --vcs=none --lib kafka
 
  ### Application 
 > $ cargo new --vcs=none books_api
+
 > $ cargo new --vcs=none books_analytics
 
 ## avro
@@ -19,7 +22,7 @@ https://betterprogramming.pub/working-with-apache-avro-in-rust-e18a20048c67
 > $ rsgen-avro --derive-builders resources/post.avsc src/avro.rs
 
 start docker-compose
-> $ cd ./kafka_dev
+
 > $ docker-compose up
 
 create topic 
