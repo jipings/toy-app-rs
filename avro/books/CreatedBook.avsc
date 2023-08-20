@@ -1,0 +1,19 @@
+{
+    "namespace": "books",
+    "type": "record",
+    "name": "CreatedBook",
+    "fields": [
+        {
+            "name": "id",
+            "type": "int"
+        },
+        {
+            "name": "title",
+            "type": "string"
+        },
+        {
+            "name": "isbn",
+            "type": "string"
+        }
+    ]
+}

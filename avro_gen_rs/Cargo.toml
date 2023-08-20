@@ -1,5 +1,5 @@
 [package]
-name = "common"
+name = "avro_gen_rs"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,5 +8,3 @@ edition = "2021"
 [dependencies]
 serde = {workspace = true}
 derive_builder = { workspace = true}
-strum = {workspace = true}
-apache-avro = {workspace = true}
