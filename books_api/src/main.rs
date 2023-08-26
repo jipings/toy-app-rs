@@ -4,6 +4,9 @@ mod repository;
 mod service;
 mod dto;
 
+use std::{fs, io};
+use std::path::{Path, PathBuf};
+
 use crate::repository::Repository;
 use apache_avro::AvroSchema;
 use common::events::dto::CreatedBook;
@@ -44,13 +47,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         BookCreatedProducer::new("localhost:9092".to_owned(), schema_registry_url.clone());
     let service = Service::new(repository, book_created_producer);
 
-    // register_schema(
-    //     schema_registry_url,
-    //     "book".to_string(),
-    //     CreatedBook::get_schema(),
-    // )
-    // .await
-    // .expect("Error while registering schema");
+    let avro_source = "../avro/books/CreatedBook.avsc";
+    let avro_str = fs::read_to_string(PathBuf::from(avro_source))?;
+
+
+    register_schema(
+        schema_registry_url,
+        "CreatedBook".to_string(),
+        "CreatedBook".to_string(),
+        avro_str,
+    )
+    .await
+    .expect("Error while registering schema");
 
     start_http_server(service).await;
     global::shutdown_tracer_provider();

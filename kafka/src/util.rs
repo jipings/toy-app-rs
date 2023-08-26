@@ -5,7 +5,7 @@ use schema_registry_converter::{
     async_impl::schema_registry::{post_schema, SrSettings},
     avro_common::get_supplied_schema,
     error::SRCError,
-    schema_registry_common::{RegisteredSchema, SuppliedSchema},
+    schema_registry_common::{RegisteredSchema, SchemaType, SuppliedSchema},
 };
 
 pub struct HeaderInjector<'a>(pub &'a mut OwnedHeaders);
@@ -49,12 +49,21 @@ impl<'a> Extractor for HeaderExtractor<'a> {
 }
 
 pub async fn register_schema(
-    schema_registry_url: String,
+    mut schema_registry_url: String,
     subject: String,
-    schema: Schema,
+    name: String,
+    avro_schema: String,
 ) -> Result<RegisteredSchema, SRCError> {
-    println!("register_schema: {:?}: {:?}", subject, schema);
+    println!("register_schema: {:?}", subject);
+    let supplied_schema: SuppliedSchema = SuppliedSchema {
+        name: Some(name),
+        schema_type: SchemaType::Avro,
+        schema: avro_schema,
+        references: vec![],
+    };
+
+    schema_registry_url = schema_registry_url + "/subjects" + &subject + "/versions";
     let sr_settings = SrSettings::new(schema_registry_url);
-    let supplied_schema: SuppliedSchema = *get_supplied_schema(&schema);
+
     post_schema(&sr_settings, subject, supplied_schema).await
 }
