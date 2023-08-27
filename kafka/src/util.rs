@@ -1,12 +1,6 @@
-use apache_avro::Schema;
 use opentelemetry::propagation::{Extractor, Injector};
 use rdkafka::message::{BorrowedHeaders, Headers, OwnedHeaders};
-use schema_registry_converter::{
-    async_impl::schema_registry::{post_schema, SrSettings},
-    avro_common::get_supplied_schema,
-    error::SRCError,
-    schema_registry_common::{RegisteredSchema, SchemaType, SuppliedSchema},
-};
+use serde::{Deserialize, Serialize};
 
 pub struct HeaderInjector<'a>(pub &'a mut OwnedHeaders);
 
@@ -48,22 +42,35 @@ impl<'a> Extractor for HeaderExtractor<'a> {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RegisterAvro {
+    pub id: Option<u32>,
+    #[serde(default)]
+    pub schema: String,
+    #[serde(default)]
+    pub schema_type: String,
+}
+
 pub async fn register_schema(
     mut schema_registry_url: String,
     subject: String,
-    name: String,
     avro_schema: String,
-) -> Result<RegisteredSchema, SRCError> {
-    println!("register_schema: {:?}", subject);
-    let supplied_schema: SuppliedSchema = SuppliedSchema {
-        name: Some(name),
-        schema_type: SchemaType::Avro,
-        schema: avro_schema,
-        references: vec![],
+) -> Result<RegisterAvro, reqwest::Error> {
+    schema_registry_url = schema_registry_url + "/subjects/" + &subject + "/versions";
+
+    let register_avro = RegisterAvro {
+        id: None,
+        schema: avro_schema.clone(),
+        schema_type: "AVRO".to_owned(),
     };
 
-    schema_registry_url = schema_registry_url + "/subjects" + &subject + "/versions";
-    let sr_settings = SrSettings::new(schema_registry_url);
-
-    post_schema(&sr_settings, subject, supplied_schema).await
+    let register_avro_res: RegisterAvro = reqwest::Client::new()
+        .post(schema_registry_url)
+        .json(&register_avro)
+        .send()
+        .await?
+        .json()
+        .await?;
+    
+    Ok(register_avro_res)
 }

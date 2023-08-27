@@ -84,7 +84,7 @@ services:
     container_name: toy-app-kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - "9090:8080"
+      - "9000:8080"
     depends_on:
       - broker
       - schema-registry

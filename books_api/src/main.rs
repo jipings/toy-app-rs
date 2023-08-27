@@ -4,17 +4,16 @@ mod repository;
 mod service;
 mod dto;
 
-use std::{fs, io};
-use std::path::{Path, PathBuf};
+use std::fs;
+use std::path::PathBuf;
 
 use crate::repository::Repository;
-use apache_avro::AvroSchema;
-use common::events::dto::CreatedBook;
 use database::get_connection;
 use http_server::start_http_server;
 use kafka::util::register_schema;
 use opentelemetry::global;
 use service::{book_created_producer::BookCreatedProducer, Service};
+use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[tokio::main]
@@ -50,15 +49,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let avro_source = "../avro/books/CreatedBook.avsc";
     let avro_str = fs::read_to_string(PathBuf::from(avro_source))?;
 
-
-    register_schema(
+    let registered_avro = register_schema(
         schema_registry_url,
-        "CreatedBook".to_string(),
         "CreatedBook".to_string(),
         avro_str,
     )
     .await
     .expect("Error while registering schema");
+
+    if !registered_avro.id.is_some() {
+        panic!("avro schema register failed, not found registered id: CreatedBook!");
+    } else {
+        info!("CreatedBook registered success, register id: {}", registered_avro.id.unwrap());
+    }
 
     start_http_server(service).await;
     global::shutdown_tracer_provider();

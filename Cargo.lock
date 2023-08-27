@@ -1625,6 +1625,7 @@ dependencies = [
  "futures",
  "opentelemetry",
  "rdkafka",
+ "reqwest",
  "schema_registry_converter",
  "serde",
  "serde_json",
